@@ -1,0 +1,245 @@
+
+= SPEC-1: User Profile Management System
+:sectnums:
+:toc:
+
+== Background
+
+The User Profile Management System is designed to provide a comprehensive solution for managing user profiles within an application. This system includes features for user registration, authentication, profile management, and administrative controls. The need for such a system arises from the requirement to manage user information efficiently, ensure secure access, and provide administrative functionalities to oversee and control user activities.
+
+Key components of the system include:
+- **Front-End**: Built using HTML, CSS, and JavaScript to ensure a responsive and user-friendly interface.
+- **Back-End**: Developed with Node.js and Express to handle business logic and API endpoints.
+- **Database**: Utilizes MongoDB for data storage and management.
+- **Authentication**: Employs JWT (JSON Web Tokens) for secure user authentication.
+- **Deployment**: Containerized with Docker and deployed on AWS for scalability and reliability.
+
+The system adheres to a three-tier architecture, consisting of:
+1. **Presentation Layer**: Front-end components for user interaction.
+2. **Application Layer**: Back-end logic and API endpoints.
+3. **Data Layer**: Database and data management.
+
+This system aims to provide a robust and user-friendly platform for managing user profiles, ensuring high performance, scalability, security, and usability.
+
+== Requirements
+
+The requirements for the User Profile Management System are prioritized using the MoSCoW method:
+
+=== Must Have
+
+1. **User Registration**: Users can register by providing a username, email, and password.
+2. **User Authentication**: Users can log in using their credentials.
+3. **Profile Management**: Users can view and update their profiles.
+4. **Admin Management**: Admins can add, edit, and delete user profiles.
+5. **Password Reset**: Users can reset their passwords via email.
+6. **Search Functionality**: Users and admins can search for profiles.
+7. **Social Media Links**: Users can add links to their social media profiles.
+8. **Security Measures**: Implement HTTPS, encrypt sensitive data, and ensure CSRF protection.
+
+=== Should Have
+
+1. **Responsive Design**: Ensure the application is accessible on different devices using CSS media queries.
+2. **Real-Time Feedback**: Provide instant feedback on form inputs.
+3. **Keyboard Navigation**: Ensure all elements are keyboard accessible.
+
+=== Could Have
+
+1. **Localization and Internationalization**: Support multiple languages and locale formats.
+2. **Analytics and Monitoring**: Integrate tools to track user behavior and monitor system performance.
+3. **Scalability Features**: Implement auto-scaling and load balancing.
+
+=== Won't Have
+
+1. **Microservices Architecture**: Breaking down the application into microservices is not a priority for the initial version.
+
+== Method
+
+=== System Architecture
+
+The system follows a three-tier architecture:
+1. **Presentation Layer**: Front-end components for user interaction.
+2. **Application Layer**: Back-end logic and API endpoints.
+3. **Data Layer**: Database and data management.
+
+[plantuml, architecture, png]
+----
+@startuml
+package "User Profile Management System" {
+  [Frontend]
+  [Backend]
+  [Database]
+}
+
+[Frontend] - [Backend] : "HTTP"
+[Backend] - [Database] : "Database Connection"
+
+note "Front-end: HTML, CSS, JavaScript" as N1
+note "Back-end: Node.js, Express" as N2
+note "Database: MongoDB" as N3
+
+N1 .. [Frontend]
+N2 .. [Backend]
+N3 .. [Database]
+@enduml
+----
+
+=== Database Schema
+
+The database schema includes the following collections:
+
+.Users Collection
+[cols="1,1,1"]
+|===
+| Field  | Type      | Description
+| _id    | ObjectId  | Unique identifier
+| username | String  | User's username
+| email   | String   | User's email
+| password | String  | Hashed password
+| role    | String   | User role (user/admin)
+| profile | Object   | Profile information
+| photo   | String   | Profile photo URL
+| socialMedia | Object | Social media links
+| youtube | String   | YouTube link
+| tiktok  | String   | TikTok link
+| instagram | String | Instagram link
+|===
+
+=== Implementation Steps
+
+==== User Registration
+
+1. **Frontend**: Create a registration form in `login.html` for new users to provide their username, email, and password.
+2. **Backend**: Set up an API endpoint in `index.js` to handle user registration.
+
+[source,js]
+----
+app.post('/register', async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({ username, email, password: hashedPassword, role: 'user' });
+    await newUser.save();
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error registering user' });
+  }
+});
+----
+
+==== User Authentication
+
+1. **Frontend**: Create a login form in `login.html` for users to enter their credentials.
+2. **Backend**: Set up an API endpoint in `index.js` to handle user login.
+
+[source,js]
+----
+app.post('/login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
+    if (user && await bcrypt.compare(password, user.password)) {
+      const token = jwt.sign({ userId: user._id, role: user.role }, SECRET_KEY, { expiresIn: '1h' });
+      res.status(200).json({ token });
+    } else {
+      res.status(400).json({ message: 'Invalid username or password' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error logging in' });
+  }
+});
+----
+
+==== Profile Management
+
+1. **Frontend**: Create profile pages where users can view and update their profile information.
+2. **Backend**: Set up API endpoints in `index.js` to handle profile retrieval and updates.
+
+[source,js]
+----
+app.get('/profile', async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const user = await User.findById(decoded.userId);
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching profile' });
+  }
+});
+
+app.put('/profile', async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    const decoded = jwt.verify(token, SECRET_KEY);
+    const { photo, socialMedia } = req.body;
+    await User.findByIdAndUpdate(decoded.userId, { photo, socialMedia });
+    res.status(200).json({ message: 'Profile updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating profile' });
+  }
+});
+----
+
+==== Admin Management
+
+1. **Frontend**: Create an admin panel in `admin.html` for managing user profiles.
+2. **Backend**: Set up API endpoints in `admin.js` to handle adding, editing, and deleting user profiles.
+
+[source,js]
+----
+app.delete('/admin/user/:id', async (req, res) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting user' });
+  }
+});
+----
+
+==== Password Reset
+
+1. **Frontend**: Create a password reset form in `login.html`.
+2. **Backend**: Set up API endpoints to handle password reset requests.
+
+[source,js]
+----
+app.post('/reset-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (user) {
+      // Generate and send a password reset link (implementation can vary)
+      res.status(200).json({ message: 'Password reset link sent' });
+    } else {
+      res.status(404).json({ message: 'Email not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error sending password reset link' });
+  }
+});
+----
+
+==== Search Functionality
+
+1. **Frontend**: Implement search bars in `index.html` and `admin.html`.
+2. **Backend**: Set up API endpoints to handle search queries.
+
+[source,js]
+----
+app.get('/search', async (req, res) => {
+  try {
+    const { query } = req.query;
+    const users = await User.find({ $text: { $search: query } });
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: 'Error searching users' });
+  }
+});
+----
+
+==== Security Measures
+
+1. **HTTPS**: Ensure the server is configured to use HTTPS.
+2. **Data Encryption**: Use bcrypt for password hashing.
+3. **CSRF Protection**: Implement tokens for form submissions.

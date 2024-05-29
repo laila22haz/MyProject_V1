@@ -1,0 +1,17 @@
+
+
+ @media (max-width: 425px) {
+
+   #adminContainer, #userContainer {
+    /* width: 400px; */
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    filter: drop-shadow(2px 4px 6px black);
+}
+.background-image {
+    
+    width: 154%;
+}
+  }

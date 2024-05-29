@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="stylesheet" href="login-styles.css">
+</head>
+<body>
+  <!-- Background Image -->
+  <img src="../imgs/free_palestine.png" alt="Background Image" class="background-image">
+  <div class="blur-mask"></div>
+  <div class="login-wrapper">
+    <div class="login-container">
+      <!-- Tabs for Sign In, Sign Up, and Forgot Password -->
+      <div class="tabs">
+        <button class="tab-link active" data-tab="signin">Sign In</button>
+        <button class="tab-link" data-tab="signup">Sign Up</button>
+        <button class="tab-link" data-tab="forgot">Forgot Password</button>
+      </div>
+      <!-- Sign In Form -->
+      <form id="signinForm" class="tab-content active">
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button type="submit" class="animated-button">Sign In</button>
+        <div id="signin-error" class="error-message"></div>
+      </form>
+      <!-- Sign Up Form -->
+      <form id="signupForm" class="tab-content">
+        <input type="text" id="signup-username" placeholder="Username" required>
+        <input type="email" id="signup-email" placeholder="Email" required>
+        <input type="password" id="signup-password" placeholder="Password" required>
+        <button type="submit" class="animated-button">Sign Up</button>
+        <div id="signup-error" class="error-message"></div>
+      </form>
+      <!-- Forgot Password Form -->
+      <form id="forgotForm" class="tab-content">
+        <input type="email" id="forgot-email" placeholder="Email" required>
+        <button type="submit" class="animated-button">Reset Password</button>
+        <div id="forgot-error" class="error-message"></div>
+      </form>
+    </div>
+  </div>
+  <script src="login-script.js" defer></script>
+</body>
+</html>
